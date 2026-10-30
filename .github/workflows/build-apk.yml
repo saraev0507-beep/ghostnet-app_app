@@ -24,13 +24,33 @@ jobs:
           cache: true
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter pub get
+          elif [ -f "ghostnet_app/pubspec.yaml" ]; then
+            cd ghostnet_app && flutter pub get
+          elif [ -f "ghostnet-app_app/pubspec.yaml" ]; then
+            cd ghostnet-app_app && flutter pub get
+          else
+            echo "pubspec.yaml не найден!"
+            exit 1
+          fi
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter build apk --release
+          elif [ -f "ghostnet_app/pubspec.yaml" ]; then
+            cd ghostnet_app && flutter build apk --release
+          elif [ -f "ghostnet-app_app/pubspec.yaml" ]; then
+            cd ghostnet-app_app && flutter build apk --release
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ghostnet-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            ghostnet_app/build/app/outputs/flutter-apk/app-release.apk
+            ghostnet-app_app/build/app/outputs/flutter-apk/app-release.apk
